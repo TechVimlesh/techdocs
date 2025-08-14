@@ -1,0 +1,956 @@
+title: Ramayan
+theme: Material You No Mod Dark
+views:
+  - title: Home
+    path: home
+    type: custom:grid-layout
+    layout:
+      grid-template-columns: 25% 25% 25% 25%
+      grid-template-rows: auto
+      grid-template-areas: |
+        "title1 title2 title3 title4"
+        "title1 title2 title3 title4"
+        "title11 title22 title33 title4"    
+        "left3 left4 middle3 title4"
+        "title5 title6 title7 title8"  
+        "left5 left6 middle4 right3"
+    cards:
+      - type: vertical-stack
+        cards:
+          - type: custom:mushroom-title-card
+            title: |-
+              {% set time = now().hour %} {% if time >= 18 %}
+                Good Evening!
+              {% elif time >= 12 %}
+                Good Afternoon!
+              {% elif time >= 5 %}
+                Good Morning!
+              {% else %}
+                Welcome!
+              {% endif %}
+            alignment: start
+            subtitle: |
+              {{ now().strftime('%a %b %-d, %-I:%M %p') }}
+          - type: custom:paper-buttons-row
+            styles:
+              justify-content: flex-start
+              flex-wrap: wrap
+              font-size: 1em
+              line-height: 1.2em
+              margin: 6px 0 12px 0
+              width: 100%
+            buttons:
+              - layout: name
+                name: It is
+                styles:
+                  button:
+                    flex-basis: 1
+                    flex-shrink: 0
+                  name:
+                    color: '#FFFFFF'
+              - layout: name|icon
+                entity: weather.forecast_home
+                name: >-
+                  {% set forecast = state_attr('weather.forecast_home',
+                  'forecast_hourly') %} {% if forecast %}
+                    {{ forecast[0].temperature }}°, {{ states('weather.forecast_home') }}
+                  {% else %}
+                    Unknown
+                  {% endif %}
+                tap_action:
+                  action: navigate
+                  navigation_path: /tablet-dark/notifications
+                icon: '{{ states(''sensor.weather_condition_icon'') }}'
+                styles:
+                  icon:
+                    color: '#000000'
+                  name:
+                    color: '#000000'
+                  button:
+                    padding: 2px 8px
+                    background-color: '#F5F5F5'
+                    border-radius: 24px
+                    flex-basis: 1
+                    flex-shrink: 0
+                    display: flex
+              - layout: name
+                name: outside, with a wind blowing at
+                styles:
+                  button:
+                    flex-basis: 1
+                    flex-shrink: 0
+                  name:
+                    color: '#FFFFFF'
+              - layout: name
+                entity: weather.forecast_home
+                name: >-
+                  {{ state_attr('weather.forecast_home',
+                  'forecast_hourly')[0].wind_speed }} km/h
+                tap_action:
+                  action: navigate
+                  navigation_path: /tablet-dark/notifications
+                styles:
+                  name:
+                    color: '#000000'
+                  button:
+                    padding: 2px 8px
+                    background-color: '#F5F5F5'
+                    border-radius: 24px
+                    flex-basis: 1
+                    flex-shrink: 0
+                    display: flex
+          - type: custom:mushroom-template-card
+            layout: horizontal
+            tap_action:
+              action: none
+            primary: Room Occupancy
+            card_mod:
+              style: |
+                ha-card {
+                  background: transparent !important;
+                  box-shadow: none !important;
+                }
+          - type: custom:mushroom-chips-card
+            chips:
+              - type: template
+                entity: input_boolean.baby_room_occupancy
+                icon: mdi:baby-carriage
+                icon_color: |-
+                  {% if is_state(entity, 'on') %} 
+                    #f385bc
+                  {% else %}
+                   grey
+                  {% endif %}
+                tap_action:
+                  action: toggle
+                content: |-
+                  {% if is_state(entity, 'on') %} 
+                    Baby
+                  {% else %}
+                  {% endif %}
+              - type: template
+                entity: input_boolean.master_bedroom_occupancy
+                icon: mdi:bed-king
+                icon_color: |-
+                  {% if is_state(entity, 'on') %} 
+                    #89CFF0
+                  {% else %}
+                   grey
+                  {% endif %}
+                tap_action:
+                  action: toggle
+                content: |-
+                  {% if is_state(entity, 'on') %} 
+                    Master
+                  {% else %}
+                  {% endif %}
+            alignment: start
+        view_layout:
+          grid-area: title1
+      - type: horizontal-stack
+        cards:
+          - type: custom:local-conditional-card
+            id: climate
+            default: show
+            card:
+              type: vertical-stack
+              cards:
+                - type: custom:paper-buttons-row
+                  styles:
+                    background-color: rgba(26, 27, 33, 0.5)
+                    border: 4px solid none
+                    border-radius: 20px
+                    justify-content: center
+                    width: max-content
+                    margin: 20px auto 12px 0px
+                  buttons:
+                    - layout: name
+                      name: Climate
+                      ripple: none
+                      tap_action:
+                        action: fire-dom-event
+                        local_conditional_card:
+                          action: set
+                          ids:
+                            - climate: show
+                            - sprinkler: hide
+                      styles:
+                        name:
+                          color: '#000000'
+                          padding: 0 22px
+                          font-weight: bold
+                        button:
+                          background: '#F7F5FC'
+                          border-radius: 24px
+                          height: 24px
+                          display: flex
+                    - layout: name
+                      name: Sprinkler
+                      ripple: none
+                      tap_action:
+                        action: fire-dom-event
+                        local_conditional_card:
+                          action: set
+                          ids:
+                            - climate: hide
+                            - sprinkler: show
+                      styles:
+                        name:
+                          color: '#FFFFFF'
+                          padding: 0 22px
+                        button:
+                          background: none
+                          border-radius: 24px
+                          height: 24px
+                          display: flex
+                - type: custom:vertical-stack-in-card
+                  cards:
+                    - type: grid
+                      square: false
+                      columns: 2
+                      cards:
+                        - type: custom:mushroom-template-card
+                          entity: sensor.house_average_temperature
+                          primary: |
+                            {{ states(entity) | round(1) }}°C 
+                          secondary: |
+                            {{ state_attr(entity,'friendly_name') }} 
+                          icon: >
+                            {% set hvac_mode = states('climate.main_thermostat')
+                            %}  
+
+                            {% if hvac_mode == 'heat' %} mdi:fire
+
+                            {% elif hvac_mode == 'cool' %} mdi:snowflake
+
+                            {% elif hvac_mode == 'fan_only' %} mdi:fan
+
+                            {% else %} mdi:thermometer
+
+                            {% endif %}
+                          icon_color: >
+                            {% set hvac_mode = states('climate.main_thermostat')
+                            %}  
+
+                            {% if hvac_mode == 'heat' %} #FF6F22
+
+                            {% elif hvac_mode == 'cool' %} #12c8da
+
+                            {% elif hvac_mode == 'fan_only' %} #029688
+
+                            {% else %}
+                              {% set temp = states('sensor.house_average_temperature') | float %}
+                              {% if temp < 16 %} #CEB2F5
+                              {% elif temp < 18 %} #5EBDEE
+                              {% elif temp < 22 %} #9cc8b8
+                              {% elif temp < 24 %} #e7b562
+                              {% elif temp < 27 %} #FF564B
+                              {% else %} #99332d
+                              {% endif %}
+                            {% endif %}
+                          tap_action:
+                            action: more-info
+                        - type: custom:mushroom-template-card
+                          entity: sensor.outdoor_temperature
+                          primary: |
+                            {{ states(entity) | round(1) }}°C 
+                          secondary: |
+                            Outdoor Feels Like
+                          icon: '{{ states(''sensor.weather_condition_icon'') }}'
+                          icon_color: >
+                            {% set temp = states('sensor.outdoor_temperature') |
+                            float %} {% if temp < 16 %} #907CAB {% elif temp <
+                            18 %} #4790b6 {% elif temp < 22 %} #77998c {% elif
+                            temp < 24 %} #b08a4a {% elif temp < 27 %}
+                            #c34139       {% else %} #752722 {% endif %}
+                          tap_action:
+                            action: navigate
+                            navigation_path: /tablet-dark/notifications
+                    - type: horizontal-stack
+                      cards:
+                        - type: custom:mushroom-climate-card
+                          entity: climate.main_thermostat
+                          primary_info: none
+                          secondary_info: none
+                          icon_type: none
+                          show_temperature_control: true
+                        - type: custom:mushroom-climate-card
+                          entity: climate.main_thermostat
+                          primary_info: none
+                          secondary_info: none
+                          icon_type: none
+                          hvac_modes:
+                            - cool
+                            - heat
+                            - fan_only
+                            - 'off'
+        view_layout:
+          grid-area: title2
+      - type: vertical-stack
+        cards:
+          - type: custom:vertical-stack-in-card
+            cards:
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: media_player.spotify
+                    state: playing
+                card:
+                  type: vertical-stack
+                  cards:
+                    - type: custom:mushroom-media-player-card
+                      entity: media_player.spotify
+                      icon: mdi:play
+                      name: Media Player
+                      use_media_info: true
+                      use_media_artwork: false
+                      show_volume_level: false
+                      media_controls:
+                        - play_pause_stop
+                        - previous
+                        - next
+                      volume_controls:
+                        - volume_buttons
+                        - volume_set
+                      layout: vertical
+                      fill_container: false
+                      collapsible_controls: true
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: media_player.spotify
+                    state_not: playing
+                card:
+                  type: markdown
+                  content: |
+                    Nothing is playing right now
+        title: Media
+        view_layout:
+          grid-area: title3
+      - type: vertical-stack
+        cards:
+          - type: horizontal-stack
+            cards:
+              - type: custom:mushroom-title-card
+                title: Calendar
+              - type: custom:mushroom-chips-card
+                chips:
+                  - type: conditional
+                    conditions:
+                      - entity: alarm_control_panel.alarmo
+                        state: triggered
+                    chip:
+                      type: template
+                      entity: alarm_control_panel.alarmo
+                      content: Triggered
+                      tap_action:
+                        action: navigate
+                        navigation_path: /tablet-dark/alarmo
+                      icon: mdi:bell-ring
+                      icon_color: '#d14f3a'
+                  - type: template
+                    entity: sensor.active_notification_count
+                    icon: mdi:bell
+                    tap_action:
+                      action: navigate
+                      navigation_path: /tablet-dark/notifications
+                alignment: end
+          - type: custom:calendar-card-pro
+            entities:
+              - entity: calendar.personal
+                accent_color: '#DE3163'
+              - entity: calendar.work
+                accent_color: '#89CFF0'
+            days_to_show: 8
+            compact_events_to_show: 8
+            background_color: transparent
+            vertical_line_width: 5px
+            event_spacing: 6px
+            first_day_of_week: monday
+            show_week_numbers: iso
+            month_separator_width: 3px
+            month_separator_color: '#E5E4E2'
+            show_progress_bar: true
+            weather:
+              position: event
+              entity: weather.forecast_home
+            tap_action:
+              action: expand
+        view_layout:
+          grid-area: title4
+      - type: horizontal-stack
+        cards:
+          - type: custom:stack-in-card
+            mode: horizontal
+            cards:
+              - type: vertical-stack
+                cards:
+                  - type: custom:mushroom-template-card
+                    primary: Garage
+                    tap_action:
+                      action: navigate
+                      navigation_path: /tablet-dark/garage-room-details
+                    secondary: >-
+                      {{ states('sensor.garage_temperature')|round(1) }}°C / {{
+                      states('sensor.garage_humidity')|round(1) }}%
+                  - type: custom:mushroom-template-card
+                    entity: switch.garage_light
+                    layout: horizontal
+                    icon: mdi:garage-variant
+                    tap_action:
+                      action: toggle
+                    icon_color: >-
+                      {% if is_state('switch.garage_light', 'on') %} #fce26f {%
+                      else %} black {% endif %}
+                    primary_info: none
+                    secondary_info: none
+              - type: custom:mushroom-chips-card
+                chips:
+                  - type: template
+                    entity: switch.garage_light
+                    tap_action:
+                      action: toggle
+                    icon: mdi:light-recessed
+                    card_mod:
+                      style: |
+                        ha-card {
+                          --chip-background: {% if is_state('switch.garage_light', 'on') %} #fce26f {% else %} #353535 {% endif %};
+                          --color: {% if is_state('switch.garage_light', 'on') %} #433752 {% else %} #DBDBDB {% endif %};
+                          justify-content: center;
+                          height: 35px !important;
+                          width: 35px !important;
+                          border: 0 !important;
+                          box-shadow: none !important;
+                          border-radius: 22px !important;
+                        }
+            card_mod:
+              style: |
+                ha-card {
+                  background:
+                  {% set temp = states('sensor.garage_temperature') | float %}
+                    {% if temp < 16 %}
+                        #DEC5FF
+                      {% elif temp < 18 %}
+                        #BAE6FF
+                      {% elif temp < 22 %}
+                        #9fdbb7
+                      {% elif temp < 24 %}
+                        #FFE7B9
+                      {% elif temp < 27 %}
+                        #FFBDB8
+                      {% else %}
+                        #F1918A
+                      {% endif %};       
+                  max-width: 100%;
+                  min-width: 50%;
+                  height: 186px;
+                }
+          - type: custom:stack-in-card
+            mode: horizontal
+            cards:
+              - type: vertical-stack
+                cards:
+                  - type: custom:mushroom-template-card
+                    primary: Living Area
+                    secondary: >-
+                      {{ states('sensor.living_room_temperature')|round(1) }}°C
+                      / {{ states('sensor.living_area_humidity')|round(1) }}%
+                    tap_action:
+                      action: navigate
+                      navigation_path: /tablet-dark/living-area-room-details
+                  - type: custom:mushroom-template-card
+                    entity: light.living_area_lights
+                    layout: horizontal
+                    icon: mdi:sofa
+                    tap_action:
+                      action: toggle
+                    icon_color: >-
+                      {% if is_state('light.living_area_lights', 'on') %}
+                      #fce26f {% else %} black {% endif %}
+                    primary_info: none
+                    secondary_info: none
+              - type: custom:mushroom-chips-card
+                chips:
+                  - type: template
+                    entity: climate.living_room
+                    tap_action:
+                      action: toggle
+                    icon: |
+                      {% if is_state(entity, 'heat_cool') %}
+                        mdi:heat-pump
+                      {% else %}
+                        mdi:heat-pump-outline
+                      {% endif %}
+                  - type: template
+                    entity: light.living_area_lights
+                    tap_action:
+                      action: toggle
+                    icon: mdi:light-recessed
+                    card_mod:
+                      style: |
+                        ha-card {
+                          --chip-background: {% if is_state('light.living_area_lights', 'on') %} #fce26f {% else %} #353535 {% endif %};
+                          --color: {% if is_state('light.living_area_lights', 'on') %} #433752 {% else %} #DBDBDB {% endif %};
+                          justify-content: center;
+                          height: 35px !important;
+                          width: 35px !important;
+                          border: 0 !important;
+                          box-shadow: none !important;
+                          border-radius: 22px !important;
+                        }
+            card_mod:
+              style: |
+                ha-card {
+                  background:
+                  {% set temp = states('sensor.living_room_temperature') | float %}
+                  {% if temp < 16 %}
+                      #DEC5FF
+                    {% elif temp < 18 %}
+                      #BAE6FF
+                    {% elif temp < 22 %}
+                      #9fdbb7
+                    {% elif temp < 24 %}
+                      #FFE7B9
+                    {% elif temp < 27 %}
+                      #FFBDB8
+                    {% else %}
+                      #F1918A
+                    {% endif %};             
+                  max-width: 100%;
+                  min-width: 50%;
+                  height: 186px;
+                }
+        view_layout:
+          grid-area: left3
+      - type: custom:mushroom-title-card
+        title: Driveway
+        card_mod:
+          style: |
+            ha-card {
+              --title-font-size: 20px !important;
+            }
+        view_layout:
+          grid-area: title5
+      - type: custom:webrtc-camera
+        entity: camera.front_door
+        style: |
+          ha-card {
+            width: 340px !important;
+          }
+        mode: webrtc
+        view_layout:
+          grid-area: left5
+  - title: Room Details
+    path: living-area-room-details
+    type: custom:grid-layout
+    layout:
+      grid-template-columns: 33% 33% 33%
+      grid-template-rows: auto
+    cards:
+      - type: horizontal-stack
+        cards:
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: light.dining_table
+                state: 'off'
+            card:
+              type: vertical-stack
+              cards:
+                - type: custom:button-card
+                  entity: light.dining_table
+                  name: Dining Table
+                  tap_action:
+                    action: none
+                  styles:
+                    card:
+                      - background: rgba(26, 27, 33, 0.5)
+                      - height: 75px
+                - type: custom:my-slider-v2
+                  entity: light.dining_table
+                  allowTapping: false
+                  allowSliding: true
+                  styles:
+                    container:
+                      - border-radius: 30px
+                    card:
+                      - margin-top: '-8px'
+                      - height: 75px
+      - type: vertical-stack
+        cards:
+          - type: custom:waterfall-history-card
+            entity: sensor.living_room_temperature
+            hours: 24
+            intervals: 48
+            columns: 12
+            compact: true
+            gradient: true
+            height: 60
+            show_current: true
+            show_labels: true
+            show_min_max: true
+            thresholds:
+              - value: 16
+                color: '#CEB2F5'
+              - value: 18
+                color: '#5EBDEE'
+              - value: 21
+                color: '#9cc8b8'
+              - value: 24
+                color: '#e7b562'
+              - value: 27
+                color: '#FF564B'
+              - value: 35
+                color: '#99332d'
+          - type: custom:stack-in-card
+            cards:
+              - type: grid
+                square: false
+                columns: 2
+                cards:
+                  - type: custom:mushroom-template-card
+                    entity: sensor.living_area_humidity
+                    primary: |
+                      {{ states(entity) | round(1) }} %
+                    secondary: Humidity
+                    icon: mdi:water-percent
+                    name: Room Humidity
+                    icon_color: >
+                      {% set humidity = states('sensor.living_area_humidity') |
+                      float %}
+
+                      {% if humidity < 31 %} #99332d          
+
+                      {% elif humidity < 51 %} #228B22
+
+                      {% else %} #99332d
+
+                      {% endif %}
+                  - type: custom:mushroom-template-card
+                    entity: sensor.outdoor_humidity
+                    primary: |
+                      {{ states(entity) | round(1) }} %
+                    secondary: Outdoor Humidity
+                    icon: mdi:water-percent
+                    name: Humidity
+                    icon_color: grey
+              - type: custom:mini-graph-card
+                entities:
+                  - entity: sensor.outdoor_humidity
+                    color: grey
+                  - entity: sensor.living_area_humidity
+                    show_fill: true
+                    state_adaptive_color: true
+                color_thresholds:
+                  - value: 0
+                    color: '#99332d'
+                  - value: 31
+                    color: '#228B22'
+                  - value: 51
+                    color: '#99332d'
+                hours_to_show: 24
+                line_width: 3
+                font_size: 50
+                animate: true
+                show:
+                  name: false
+                  icon: false
+                  state: false
+                  legend: false
+                  fill: fade
+  - title: Weather & Notifications
+    path: notifications
+    type: custom:grid-layout
+    layout:
+      grid-template-columns: 33% 33% 33%
+      grid-template-rows: auto
+    cards:
+      - type: vertical-stack
+        cards:
+          - type: custom:mushroom-chips-card
+            chips:
+              - type: conditional
+                conditions:
+                  - condition: numeric_state
+                    entity: sensor.soil_moisture
+                    below: 40
+                chip:
+                  type: template
+                  entity: sensor.soil_moisture
+                  icon: mdi:water-percent
+                  content: '{{ states(''sensor.soil_moisture'') }}%'
+                  icon_color: >
+                    {% set moisture = states('sensor.soil_moisture') | int(0) %}
+                    {% if moisture >= 40 %}
+                      green
+                    {% elif moisture >= 25 %}
+                      yellow
+                    {% else %}
+                      red
+                    {% endif %}
+                  tap_action:
+                    action: more-info
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: input_boolean.rubbish
+                    state: 'on'
+                chip:
+                  type: template
+                  entity: input_boolean.rubbish
+                  icon: mdi:trash-can
+                  icon_color: '#C41E3A'
+                  content: Rubbish Day
+                  tap_action:
+                    action: more-info
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: input_boolean.recycle
+                    state: 'on'
+                chip:
+                  type: template
+                  entity: input_boolean.recycle
+                  icon: mdi:recycle
+                  icon_color: '#50C878'
+                  content: Recycle Day
+                  tap_action:
+                    action: more-info
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: binary_sensor.garage_door
+                    state: 'on'
+                chip:
+                  type: template
+                  entity: binary_sensor.garage_door
+                  icon: mdi:garage-variant
+                  icon_color: red
+                  content: Garage Opened
+                  tap_action:
+                    action: navigate
+                    navigation_path: /tablet-dark/cameras
+          - type: vertical-stack
+            cards:
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: light.all_lights
+                    state: 'on'
+                card:
+                  type: custom:mushroom-title-card
+                  title: Lights
+                  card_mod:
+                    style: |
+                      ha-card {
+                        --title-font-size: 18px !important;
+                      }
+              - type: custom:auto-entities
+                card:
+                  square: false
+                  type: grid
+                  columns: 2
+                card_param: cards
+                filter:
+                  include:
+                    - group: light.all_lights
+                      state: 'on'
+                      options:
+                        type: custom:mushroom-light-card
+                        use_light_color: true
+                        show_brightness_control: true
+                        show_color_control: true
+                        layout: vertical
+                  exclude: []
+                show_empty: false
+                sort:
+                  method: entity_id
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: >
+              {{ states('sensor.weather_description') }}  # REPLACE WITH YOUR
+              WEATHER DESCRIPTION
+
+
+              **Pollen Status**
+
+              {{ states('sensor.pollen_type') }}  # REPLACE WITH YOUR POLLEN
+              SENSOR
+          - type: weather-forecast
+            entity: weather.forecast_home
+            show_current: false
+            show_forecast: true
+            forecast_type: daily
+            forecast_slots: 5
+            theme: Material You No Mod Dark
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: sensor.weather_warnings
+                state_not: unknown
+            card:
+              type: vertical-stack
+              cards:
+                - type: custom:mushroom-title-card
+                  title: Weather Warning
+                  card_mod:
+                    style: |
+                      ha-card {
+                        --title-font-size: 20px !important;
+                      }
+                - type: markdown
+                  content: >-
+                    {{ state_attr('sensor.weather_warnings', 'warnings') |
+                    default('No warnings') }}
+
+                    _Issued: {{
+                    states.sensor.weather_warnings.last_changed.strftime('%I:%M%p
+                    %A, %d %b') }}_
+                  text_only: true
+      - type: custom:mod-card
+        card:
+          type: iframe
+          url: >-
+            https://embed.windy.com/embed2.html?lat=YOUR_LATITUDE&lon=YOUR_LONGITUDE&detailLat=YOUR_LATITUDE&detailLon=YOUR_LONGITUDE&width=650&height=450&zoom=5&level=surface&overlay=wind&product=ecmwf&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1
+        style: |
+          ha-card {
+            height: 100% !important;
+            width: 100% !important;
+            min-height: 500px;
+          }
+  - title: Cameras
+    path: cameras
+    type: custom:grid-layout
+    layout:
+      grid-template-columns: 50% 50%
+      grid-template-rows: auto
+    cards:
+      - type: custom:webrtc-camera
+        entity: camera.front_door
+        mode: webrtc
+        title: Front Door
+      - type: custom:webrtc-camera
+        entity: camera.back_yard
+        mode: webrtc
+        title: Back Yard
+      - type: custom:webrtc-camera
+        entity: camera.driveway
+        mode: webrtc
+        title: Driveway
+      - type: custom:webrtc-camera
+        entity: camera.garage
+        mode: webrtc
+        title: Garage
+  - title: Lighting Scenes
+    path: hue-scenes
+    type: custom:grid-layout
+    layout:
+      grid-template-columns: 25% 25% 25% 25%
+      grid-template-rows: auto
+    cards:
+      - type: custom:mushroom-title-card
+        title: Philips Hue Scenes
+        subtitle: Living Area Lighting Control
+      - type: custom:button-card
+        name: Relaxing
+        icon: mdi:weather-sunset
+        tap_action:
+          action: call-service
+          service: scene.turn_on
+          service_data:
+            entity_id: scene.living_area_relaxing
+        styles:
+          card:
+            - background: '#FFB366'
+            - color: '#333333'
+            - height: 120px
+            - border-radius: 15px
+          icon:
+            - color: '#333333'
+            - size: 40px
+      - type: custom:button-card
+        name: Energizing
+        icon: mdi:white-balance-sunny
+        tap_action:
+          action: call-service
+          service: scene.turn_on
+          service_data:
+            entity_id: scene.living_area_energizing
+        styles:
+          card:
+            - background: '#FFE135'
+            - color: '#333333'
+            - height: 120px
+            - border-radius: 15px
+          icon:
+            - color: '#333333'
+            - size: 40px
+      - type: custom:button-card
+        name: Reading
+        icon: mdi:book-open-page-variant
+        tap_action:
+          action: call-service
+          service: scene.turn_on
+          service_data:
+            entity_id: scene.living_area_reading
+        styles:
+          card:
+            - background: '#E6E6FA'
+            - color: '#333333'
+            - height: 120px
+            - border-radius: 15px
+          icon:
+            - color: '#333333'
+            - size: 40px
+      - type: custom:button-card
+        name: Movie Time
+        icon: mdi:movie-roll
+        tap_action:
+          action: call-service
+          service: scene.turn_on
+          service_data:
+            entity_id: scene.living_area_movie
+        styles:
+          card:
+            - background: '#8B4513'
+            - color: '#FFFFFF'
+            - height: 120px
+            - border-radius: 15px
+          icon:
+            - color: '#FFFFFF'
+            - size: 40px
+      - type: custom:button-card
+        name: 'Off'
+        icon: mdi:lightbulb-off
+        tap_action:
+          action: call-service
+          service: light.turn_off
+          service_data:
+            entity_id: light.living_area_lights
+        styles:
+          card:
+            - background: '#333333'
+            - color: '#FFFFFF'
+            - height: 120px
+            - border-radius: 15px
+          icon:
+            - color: '#FFFFFF'
+            - size: 40px
+  - title: Security
+    path: alarmo
+    type: custom:grid-layout
+    layout:
+      grid-template-columns: 100%
+      grid-template-rows: auto
+    cards:
+      - type: custom:alarmo-card
+        entity: alarm_control_panel.alarmo
+        name: Home Security System
+        show_keypad: true
+        show_ready: true
+        show_bypassed_sensors: true
+        button_scaling: 1.2
+        auto_enter:
+          code_length: 4
+          delay: 3
